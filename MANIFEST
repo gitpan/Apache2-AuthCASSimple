@@ -1,0 +1,10 @@
+Changes
+lib/Apache2/AuthCASSimple.pm
+LICENSE
+Makefile.PL
+MANIFEST
+MANIFEST.SKIP
+README
+scripts/delete_session_data.pl
+t/001_load.t
+Todo
