@@ -1,5 +1,5 @@
 This is the debian package for the Apache2-AuthCASSimple module.
-It was created by AGOSTINI Yves <agostini@univ-metz.fr> using dh-make-perl.
+It was created by yves <yves@> using dh-make-perl.
 
 This copyright info was automatically extracted from the perl module.
 It may not be accurate, so you better check the module sources
