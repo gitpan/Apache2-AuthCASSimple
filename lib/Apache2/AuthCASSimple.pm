@@ -12,7 +12,7 @@ use Apache2::Connection;
 use CGI;
 use vars qw($VERSION);
 
-$VERSION = '0.07';
+$VERSION = '0.08';
 
 #
 # handler()
@@ -47,6 +47,7 @@ sub handler ($) {
   if($cas_session_timeout >= 0 && ($user = _get_user_from_session($r))) {
     $log->info(__PACKAGE__.": Session found for user $user.");
     $r->user($user);
+    $r->subprocess_env( REMOTE_USER => $user );
     return OK;
   }
   elsif($cas_session_timeout >= 0) {
