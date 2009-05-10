@@ -9,9 +9,11 @@ use Apache2::Log;
 use Apache::Session::Wrapper;
 use Authen::CAS::Client;
 use Apache2::Connection;
+use Apache2::RequestIO;
+use URI::Escape;
 use vars qw($VERSION);
 
-$VERSION = '0.09';
+$VERSION = '0.10';
 
 #
 # handler()
@@ -66,9 +68,7 @@ sub handler ($) {
   }
 
   my $requested_url = _get_requested_url($r,$mod_proxy);
-  my $login_url = $requested_url;
-  # TODO better clean url
-  $login_url =~ s/\?/\&/;
+  my $login_url = uri_escape $requested_url;
   $login_url = $cas->login_url().$login_url;
   #$log->info( '==login_url==='.$login_url.'____');
 
@@ -100,7 +100,7 @@ sub handler ($) {
 
   unless ($user) {
     $log->info(__PACKAGE__.": Unable to validate ticket ".$ticket." on CAS server.");
-    $r->err_headers_out->add("Location" => $login_url);
+    $r->err_headers_out->add("Location" => $r->uri._str_args($r)); # remove ticket
     return REDIRECT;
   }
 
@@ -108,12 +108,11 @@ sub handler ($) {
 
   if ( $user ) {
    $r->user($user);
-   my $str_args = _str_args($r);
+   my $str_args = _str_args($r); # remove ticket
 
    $log->info(__PACKAGE__.": New session ".$r->uri() ."--".$r->args());
 
    # if we are there (and timeout is set), we can create session data and cookie
-   _remove_ticket($r);
    _create_user_session($r) if($cas_session_timeout >= 0);
    $log->debug("Location => ".$r->uri . ($str_args ? '?' . $str_args : ''));
    $r->err_headers_out->add("Location" => $r->uri . ($str_args ? '?' . $str_args : '') );
@@ -142,7 +141,6 @@ sub _str_args ($;$) {
   foreach (sort {$a cmp $b} keys(%args)) {
     next if ($_ eq 'ticket' && !$keep_ticket);
     my $str = $args{$_};
-    $str =~ s/([^A-Za-z0-9])/sprintf("%%%02X", ord($1))/seg;
     push(@qs, $_."=".$str);
   }
 
@@ -193,7 +191,8 @@ sub _get_query_string ($) {
 sub _post_to_get ($) {
   my $r = shift;
 
-  my $content = _str_args($r,1);
+  my $content;
+  $r->read($content,$r->headers_in->{'Content-length'});
 
   $r->log()->info('POST to GET: '.$content);
   $r->method("GET");
@@ -320,11 +319,11 @@ __END__
 
 =head1 NAME
 
-Apache2::AuthCASSimple - Apache2 module to authentificate trough a CAS server
+Apache2::AuthCASSimple - Apache2 module to authentificate through a CAS server
 
 =head1 DESCRIPTION
 
-Apache2::AuthCASSimple is an authentication module for Apache2/mod_perl2. It allow you to authentificate users trough a Yale CAS server. It means you don't need to give login/password if you've already be authentificate by the CAS server, only tickets are exchanged between Web client, Apache2 server and CAS server. If you not're authentificate yet, you'll be redirect on the CAS server login form.
+Apache2::AuthCASSimple is an authentication module for Apache2/mod_perl2. It allow you to authentificate users through a Yale CAS server. It means you don't need to give login/password if you've already be authentificate by the CAS server, only tickets are exchanged between Web client, Apache2 server and CAS server. If you not're authentificate yet, you'll be redirect on the CAS server login form.
 
 This module allow the use of simple text files for sessions.
 
@@ -425,7 +424,7 @@ call by apache2
 
 =head1 VERSION
 
-This documentation describes Apache2::AuthCASSimple version 0.09
+This documentation describes Apache2::AuthCASSimple version 0.10
 
 =head1 BUGS AND TROUBLESHOOTING
 

@@ -1,15 +1,14 @@
 ---
-abstract: 'Apache2 module to authentificate trough a CAS server'
+abstract: 'Apache2 module to authentificate through a CAS server'
 author:
   - 'Yves Agostini'
 build_requires:
-  Apache2::Connection: 0
-  Apache2::Log: 0
   Apache::Session::Wrapper: 0
   Authen::CAS::Client: 0
   Pod::Coverage: 0
   Test::More: 0
-  mod_perl2: 1.99
+  URI::Escape: 0
+  mod_perl2: 0
 distribution_type: module
 generated_by: 'Module::Install version 0.76'
 license: perl
@@ -24,12 +23,12 @@ no_index:
     - t
     - examples
 requires:
-  Apache2::Connection: 0
-  Apache2::Log: 0
   Apache::Session::Wrapper: 0
   Authen::CAS::Client: 0
-  mod_perl: 1.99
+  Crypt::SSLeay: 0
+  URI::Escape: 0
+  mod_perl2: 0
   perl: 5.8.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.09
+version: 0.10
